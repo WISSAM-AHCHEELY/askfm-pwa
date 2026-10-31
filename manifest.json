@@ -1,0 +1,27 @@
+
+{
+  "id": "./",
+  "name": "ASK - منصة الأسئلة والأجوبة",
+  "short_name": "ASK",
+  "description": "منصة اجتماعية للأسئلة والأجوبة والتواصل",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#17151d",
+  "theme_color": "#17151d",
+  "categories": [
+    "social",
+    "communication"
+  ],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
