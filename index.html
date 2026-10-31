@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#17151d">
+  <meta name="description" content="منصة اجتماعية للأسئلة والأجوبة والتواصل">
+  <title>ASK — اسأل وأجب</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+
+<body>
+  <div class="app-shell">
+
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="الرئيسية">
+        <span class="brand-mark">A</span>
+        <span>ASK</span>
+      </a>
+
+      <div class="header-actions">
+        <button class="icon-button" id="searchButton" aria-label="البحث">
+          <span>⌕</span>
+        </button>
+        <button class="icon-button" id="notificationButton" aria-label="الإشعارات">
+          <span>♧</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="welcome-section">
+        <div class="welcome-content">
+          <span class="eyebrow">مساحتك الاجتماعية</span>
+          <h1>اسأل. أجب.<br><span>كن على طبيعتك.</span></h1>
+          <p>
+            مساحة للتعارف وتبادل الأسئلة والأجوبة
+            والتواصل مع الآخرين.
+          </p>
+        </div>
+
+        <div class="welcome-art" aria-hidden="true">
+          <div class="art-circle">
+            <span>?</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="connection-card">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">حالة النظام</span>
+            <h2>الاتصال بالخادم</h2>
+          </div>
+          <span class="status-dot" id="connectionDot"></span>
+        </div>
+
+        <p id="connectionStatus" aria-live="polite">
+          جارٍ فحص الاتصال...
+        </p>
+
+        <button class="primary-button" id="retryConnection">
+          إعادة فحص الاتصال
+        </button>
+      </section>
+
+      <section class="intro-section">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">ابدأ رحلتك</span>
+            <h2>كل شيء يبدأ بسؤال</h2>
+          </div>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <span class="feature-icon">?</span>
+            <h3>اطرح سؤالاً</h3>
+            <p>اسأل الآخرين وابدأ محادثة جديدة.</p>
+          </article>
+
+          <article class="feature-card">
+            <span class="feature-icon">✎</span>
+            <h3>شارك إجابتك</h3>
+            <p>عبّر عن رأيك وشارك أفكارك.</p>
+          </article>
+
+          <article class="feature-card">
+            <span class="feature-icon">♡</span>
+            <h3>تواصل مع الناس</h3>
+            <p>اكتشف أشخاصاً واهتمامات جديدة.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="phase-note">
+        <span class="phase-number">01</span>
+        <div>
+          <h3>مرحلة التأسيس</h3>
+          <p>نعمل الآن على تجهيز المنصة والاتصال الآمن بقاعدة البيانات.</p>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="التنقل الرئيسي">
+      <a class="nav-item active" href="./">
+        <span>⌂</span>
+        <small>الرئيسية</small>
+      </a>
+      <button class="nav-item" type="button" disabled>
+        <span>⌕</span>
+        <small>اكتشف</small>
+      </button>
+      <button class="nav-item" type="button" disabled>
+        <span>＋</span>
+        <small>اسأل</small>
+      </button>
+      <button class="nav-item" type="button" disabled>
+        <span>▤</span>
+        <small>الرسائل</small>
+      </button>
+      <button class="nav-item" type="button" disabled>
+        <span>♙</span>
+        <small>حسابي</small>
+      </button>
+    </nav>
+
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
