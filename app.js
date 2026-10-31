@@ -8,9 +8,7 @@ const statusDot = document.getElementById("connectionDot");
 const retryButton = document.getElementById("retryConnection");
 
 function updateStatus(message, state = "checking") {
-  if (statusText) {
-    statusText.textContent = message;
-  }
+  if (statusText) statusText.textContent = message;
 
   if (statusDot) {
     statusDot.classList.remove("online", "offline");
@@ -35,20 +33,13 @@ function validateConfiguration() {
   }
 
   if (!publishableKey.startsWith("sb_publishable_")) {
-    throw new Error("مفتاح Supabase المستخدم ليس Publishable Key.");
+    throw new Error("مفتاح Supabase المستخدم غير صحيح.");
   }
 }
 
 async function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) {
-    console.warn("المتصفح لا يدعم Service Worker.");
-    return;
-  }
-
-  if (!window.isSecureContext) {
-    console.warn("يحتاج Service Worker إلى HTTPS.");
-    return;
-  }
+  if (!("serviceWorker" in navigator)) return;
+  if (!window.isSecureContext) return;
 
   try {
     const registration = await navigator.serviceWorker.register("./sw.js", {
@@ -84,7 +75,6 @@ async function initializeSupabase() {
     );
 
     await testConnection();
-
   } catch (error) {
     console.error("Supabase initialization error:", error);
 
@@ -110,13 +100,11 @@ async function testConnection() {
 
   try {
     const response = await fetch(
-      `${SUPABASE_CONFIG.url}/rest/v1/`,
+      `${SUPABASE_CONFIG.url}/auth/v1/health`,
       {
         method: "GET",
         headers: {
-          apikey: SUPABASE_CONFIG.publishableKey,
-          Authorization: `Bearer ${SUPABASE_CONFIG.publishableKey}`,
-          Accept: "application/openapi+json"
+          apikey: SUPABASE_CONFIG.publishableKey
         },
         cache: "no-store"
       }
@@ -126,8 +114,14 @@ async function testConnection() {
       throw new Error(`Supabase returned status ${response.status}`);
     }
 
+    const result = await response.json();
+
+    if (!result || !result.name) {
+      throw new Error("استجابة Supabase غير متوقعة.");
+    }
+
     updateStatus(
-      "الاتصال بـ Supabase ناجح. الخادم يستجيب بصورة طبيعية.",
+      "الاتصال بـ Supabase ناجح. الخادم يعمل بصورة طبيعية.",
       "online"
     );
 
@@ -152,9 +146,7 @@ if (retryButton) {
 }
 
 window.addEventListener("online", () => {
-  if (supabase) {
-    testConnection();
-  }
+  if (supabase) testConnection();
 });
 
 window.addEventListener("offline", () => {
