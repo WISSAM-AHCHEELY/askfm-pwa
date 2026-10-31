@@ -39,6 +39,28 @@ function validateConfiguration() {
   }
 }
 
+async function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    console.warn("المتصفح لا يدعم Service Worker.");
+    return;
+  }
+
+  if (!window.isSecureContext) {
+    console.warn("يحتاج Service Worker إلى HTTPS.");
+    return;
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.register("./sw.js", {
+      scope: "./"
+    });
+
+    console.info("Service Worker registered:", registration.scope);
+  } catch (error) {
+    console.error("Service Worker registration failed:", error);
+  }
+}
+
 async function initializeSupabase() {
   updateStatus("جارٍ تجهيز الاتصال بـ Supabase...");
 
@@ -139,4 +161,5 @@ window.addEventListener("offline", () => {
   updateStatus("لا يوجد اتصال بالإنترنت حالياً.", "offline");
 });
 
+registerServiceWorker();
 initializeSupabase();
