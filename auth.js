@@ -4,6 +4,7 @@ import { SUPABASE_CONFIG } from "./config.js";
 let supabase = null;
 let authMode = "signup";
 let authSubscription = null;
+let recoveryMode = false;
 
 const authForm = document.getElementById("authForm");
 const authTitle = document.getElementById("authTitle");
@@ -182,6 +183,7 @@ async function handleSubmit(event) {
 
       if (error) throw error;
 
+      recoveryMode = false;
       renderSession(data.session);
       showMessage("تم تسجيل الدخول بنجاح.", "success");
     }
@@ -212,10 +214,13 @@ async function handleSubmit(event) {
         throw new Error("كلمتا المرور غير متطابقتين.");
       }
 
-      const { error } = await supabase.auth.updateUser({ password });
+      const { error } = await supabase.auth.updateUser({
+        password
+      });
 
       if (error) throw error;
 
+      recoveryMode = false;
       showMessage("تم تحديث كلمة المرور بنجاح.", "success");
 
       const { data } = await supabase.auth.getSession();
@@ -235,6 +240,23 @@ async function initializeAuth() {
       throw new Error("إعدادات Supabase غير مكتملة.");
     }
 
+    // اكتشاف رابط استعادة كلمة المرور قبل عرض واجهة التسجيل
+    const hashParams = new URLSearchParams(
+      window.location.hash.replace(/^#/, "")
+    );
+
+    const isRecoveryLink =
+      hashParams.get("type") === "recovery";
+
+    if (isRecoveryLink) {
+      recoveryMode = true;
+      setMode("recovery");
+      authForm.classList.remove("hidden");
+      authTabs.classList.add("hidden");
+      accountPanel.classList.add("hidden");
+      showMessage("جارٍ التحقق من رابط الاستعادة...");
+    }
+
     const { createClient } = await import(
       "https://esm.sh/@supabase/supabase-js@2.57.0"
     );
@@ -251,20 +273,20 @@ async function initializeAuth() {
       }
     );
 
-    const { data, error } = await supabase.auth.getSession();
-
-    if (error) throw error;
-
-    renderSession(data.session);
-
+    // الاشتراك بالأحداث فور إنشاء العميل، قبل getSession
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === "PASSWORD_RECOVERY") {
+          recoveryMode = true;
           setMode("recovery");
           authForm.classList.remove("hidden");
           accountPanel.classList.add("hidden");
           authTabs.classList.add("hidden");
           showMessage("أدخل كلمة المرور الجديدة.", "info");
+          return;
+        }
+
+        if (recoveryMode) {
           return;
         }
 
@@ -280,6 +302,16 @@ async function initializeAuth() {
     );
 
     authSubscription = listener.subscription;
+
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) throw error;
+
+    // لا نسمح لنتيجة الجلسة بإلغاء وضع الاستعادة
+    if (!recoveryMode) {
+      renderSession(data.session);
+    }
+
   } catch (error) {
     console.error("Authentication initialization error:", error);
     showMessage(
@@ -313,6 +345,7 @@ signOutButton.addEventListener("click", async () => {
 
     if (error) throw error;
 
+    recoveryMode = false;
     renderSession(null);
     showMessage("تم تسجيل الخروج بنجاح.", "success");
   } catch (error) {
@@ -327,4 +360,3 @@ window.addEventListener("beforeunload", () => {
 });
 
 initializeAuth();
-
