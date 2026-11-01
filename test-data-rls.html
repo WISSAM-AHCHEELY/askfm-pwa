@@ -1,0 +1,1058 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>اختبار أمان البيانات</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 18px;
+      max-width: 850px;
+      margin-inline: auto;
+      background: #0b1220;
+      color: #e5e7eb;
+      font-family: system-ui, sans-serif;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+    }
+
+    p {
+      line-height: 1.8;
+      color: #cbd5e1;
+    }
+
+    .card {
+      background: #111c2e;
+      border: 1px solid #26364d;
+      border-radius: 14px;
+      padding: 16px;
+      margin: 14px 0;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+    }
+
+    select,
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 9px;
+      font: inherit;
+    }
+
+    select {
+      color: white;
+      background: #0b1220;
+      border: 1px solid #42536b;
+    }
+
+    button {
+      border: 0;
+      background: #d97706;
+      color: #111827;
+      font-weight: bold;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #334155;
+      color: white;
+    }
+
+    button.danger {
+      background: #991b1b;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: .45;
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 9px;
+      background: #0b1220;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.8;
+    }
+
+    .pass {
+      color: #86efac;
+    }
+
+    .fail {
+      color: #fca5a5;
+    }
+
+    .muted {
+      color: #94a3b8;
+      font-size: .9rem;
+    }
+
+    ol {
+      padding-right: 22px;
+      line-height: 2;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>اختبار صلاحيات الأسئلة والإجابات (RLS)</h1>
+
+  <p>
+    صفحة اختبار مؤقتة للتحقق من حماية البيانات بين المستخدمين.
+    لن تغيّر تصميم الموقع أو قاعدة البيانات.
+  </p>
+
+  <section class="card">
+
+    <strong>اختيار الحسابين</strong>
+
+    <label for="accountA">
+      الحساب A — مرسل الأسئلة
+    </label>
+
+    <select id="accountA">
+      <option>جارٍ تحميل الحسابات...</option>
+    </select>
+
+    <label for="accountB">
+      الحساب B — مستلم الأسئلة
+    </label>
+
+    <select id="accountB">
+      <option>جارٍ تحميل الحسابات...</option>
+    </select>
+
+    <p class="muted">
+      يجب أن يكون الحسابان مختلفين، وأن تملك صلاحية الدخول إليهما.
+    </p>
+
+    <div id="session" class="status">
+      جارٍ التحقق من جلسة الدخول...
+    </div>
+
+  </section>
+
+  <section class="card">
+
+    <strong>خطوات الاختبار</strong>
+
+    <ol>
+      <li>سجّل الدخول بالحساب A وأنشئ سؤالين للحساب B.</li>
+      <li>سجّل الدخول بالحساب B وأنشئ سؤالاً عكسياً وإجابة خاصة.</li>
+      <li>ارجع إلى الحساب A واختبر منع الوصول إلى الإجابة الخاصة.</li>
+      <li>ارجع إلى الحساب B واختبر منع نقل الإجابة إلى سؤال آخر.</li>
+      <li>اختبر صلاحيات الزائر غير المسجل.</li>
+      <li>احذف بيانات الاختبار من الحسابين.</li>
+    </ol>
+
+  </section>
+
+  <section class="card">
+
+    <strong>المرحلة الأولى — الحساب A</strong>
+
+    <p>
+      سجّل الدخول بالحساب A من صفحة الحسابات، ثم اضغط الزر.
+    </p>
+
+    <button id="createA">
+      إنشاء سؤالين للحساب B
+    </button>
+
+  </section>
+
+  <section class="card">
+
+    <strong>المرحلة الثانية — الحساب B</strong>
+
+    <p>
+      سجّل الخروج، ثم ادخل بالحساب B واضغط الزر.
+    </p>
+
+    <button id="createB">
+      إنشاء السؤال العكسي والإجابة الخاصة
+    </button>
+
+  </section>
+
+  <section class="card">
+
+    <strong>المرحلة الثالثة — الحساب A</strong>
+
+    <p>
+      سجّل الدخول بالحساب A واختبر صلاحيات قراءة الإجابات وإضافتها.
+    </p>
+
+    <button id="testA">
+      اختبار صلاحيات الحساب A
+    </button>
+
+  </section>
+
+  <section class="card">
+
+    <strong>المرحلة الرابعة — الحساب B</strong>
+
+    <p>
+      سجّل الدخول بالحساب B واختبر منع نقل الإجابة إلى سؤال لا يخصه.
+    </p>
+
+    <button id="testB">
+      اختبار صلاحيات الحساب B
+    </button>
+
+  </section>
+
+  <section class="card">
+
+    <strong>اختبار الزائر غير المسجل</strong>
+
+    <p>
+      سيسجّل هذا الاختبار خروج الحساب الحالي، ثم يتحقق من منع الزائر
+      من قراءة جدول الأسئلة. ستحتاج بعدها إلى تسجيل الدخول مجدداً.
+    </p>
+
+    <button id="testAnon" class="secondary">
+      اختبار صلاحيات الزائر
+    </button>
+
+  </section>
+
+  <section class="card">
+
+    <strong>تنظيف بيانات الاختبار</strong>
+
+    <p>
+      نفّذ تنظيف B أولاً، ثم تنظيف A.
+      لا تحذف الصفحة أي صف لا يحمل علامة الاختبار الخاصة بهذه الجولة.
+    </p>
+
+    <button id="cleanupB" class="danger">
+      تنظيف بيانات الحساب B
+    </button>
+
+    <button id="cleanupA" class="danger">
+      تنظيف بيانات الحساب A
+    </button>
+
+  </section>
+
+  <section class="card">
+
+    <strong>نتائج الاختبارات</strong>
+
+    <div id="log" class="status">
+      لم يبدأ الاختبار بعد.
+    </div>
+
+  </section>
+
+<script type="module">
+
+  import {
+    createClient
+  } from "https://esm.sh/@supabase/supabase-js@2.57.0";
+
+  import {
+    SUPABASE_CONFIG
+  } from "./config.js";
+
+
+  const supabase = createClient(
+    SUPABASE_CONFIG.url,
+    SUPABASE_CONFIG.publishableKey,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  );
+
+
+  const $ = id => document.getElementById(id);
+
+  const STORAGE_KEY = "askfm_pwa_rls_test_v1";
+
+  const state = JSON.parse(
+    localStorage.getItem(STORAGE_KEY) || "{}"
+  );
+
+  if (!state.tag) {
+    state.tag = "RLS_TEST_" + crypto.randomUUID();
+  }
+
+  function save() {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(state)
+    );
+  }
+
+
+  function log(message, type = "") {
+
+    const line = document.createElement("div");
+
+    line.className = type;
+
+    line.textContent = message;
+
+    $("log").appendChild(line);
+
+    $("log").scrollTop = $("log").scrollHeight;
+  }
+
+
+  function clearLog() {
+    $("log").replaceChildren();
+  }
+
+
+  async function getCurrentUser() {
+
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error) throw error;
+
+    return data.user;
+  }
+
+
+  async function requireAccount(expectedId, label) {
+
+    const user = await getCurrentUser();
+
+    if (!user) {
+      throw new Error(
+        "لا توجد جلسة دخول. سجّل الدخول أولاً."
+      );
+    }
+
+    if (user.id !== expectedId) {
+      throw new Error(
+        "الحساب الحالي ليس الحساب " + label +
+        ". سجّل الدخول بالحساب الصحيح."
+      );
+    }
+
+    return user;
+  }
+
+
+  function expectDenied(result, description) {
+
+    const blocked =
+      Boolean(
+        result.error &&
+        (
+          result.error.code === "42501" ||
+          result.error.code === "PGRST301"
+        )
+      ) ||
+      (
+        !result.error &&
+        Array.isArray(result.data) &&
+        result.data.length === 0
+      );
+
+    if (!blocked) {
+
+      throw new Error(
+        description +
+        " — لم يتم منع العملية كما ينبغي. " +
+        (result.error?.message || "تم إرجاع بيانات.")
+      );
+
+    }
+
+    log(
+      "نجاح: " + description + " — تم منع الوصول.",
+      "pass"
+    );
+  }
+
+
+  function expectVisible(result, description) {
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    if (
+      !Array.isArray(result.data) ||
+      result.data.length !== 1
+    ) {
+      throw new Error(
+        description + " — النتيجة غير متوقعة."
+      );
+    }
+
+    log(
+      "نجاح: " + description,
+      "pass"
+    );
+  }
+
+
+  async function loadProfiles() {
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id,username,display_name")
+      .order("created_at");
+
+    if (error) throw error;
+
+    if (!data || data.length < 2) {
+      throw new Error(
+        "يلزم وجود حسابين على الأقل."
+      );
+    }
+
+    for (const id of ["accountA", "accountB"]) {
+
+      const select = $(id);
+
+      select.replaceChildren();
+
+      data.forEach(profile => {
+
+        const option = document.createElement("option");
+
+        option.value = profile.id;
+
+        option.textContent =
+          (profile.display_name || profile.username || "مستخدم") +
+          " — @" +
+          (profile.username || "بدون اسم مستخدم");
+
+        select.appendChild(option);
+
+      });
+
+    }
+
+    if (state.accountA) {
+      $("accountA").value = state.accountA;
+    }
+
+    if (state.accountB) {
+      $("accountB").value = state.accountB;
+    }
+
+    if (
+      !$("accountB").value ||
+      $("accountA").value === $("accountB").value
+    ) {
+
+      const other = data.find(
+        p => p.id !== $("accountA").value
+      );
+
+      if (other) {
+        $("accountB").value = other.id;
+      }
+
+    }
+
+    state.accountA = $("accountA").value;
+    state.accountB = $("accountB").value;
+
+    save();
+  }
+
+
+  async function refreshSession() {
+
+    const user = await getCurrentUser();
+
+    $("session").textContent = user
+      ? "الحساب الحالي: " +
+        (user.email || user.id) +
+        "\nUID: " + user.id
+      : "لا يوجد حساب مسجل الدخول حالياً.";
+
+  }
+
+
+  $("accountA").addEventListener("change", () => {
+
+    state.accountA = $("accountA").value;
+
+    save();
+
+  });
+
+
+  $("accountB").addEventListener("change", () => {
+
+    state.accountB = $("accountB").value;
+
+    save();
+
+  });
+
+
+  // المرحلة الأولى: الحساب A ينشئ سؤالين للحساب B
+
+  $("createA").onclick = async () => {
+
+    clearLog();
+
+    try {
+
+      const a = $("accountA").value;
+      const b = $("accountB").value;
+
+      if (!a || !b || a === b) {
+        throw new Error("اختر حسابين مختلفين.");
+      }
+
+      await requireAccount(a, "A");
+
+      if (state.qPrivate || state.qAttack) {
+        throw new Error(
+          "بيانات الاختبار موجودة مسبقاً. أكمل الاختبار أو نظّفها."
+        );
+      }
+
+      const q1 = await supabase
+        .from("questions")
+        .insert({
+          recipient_id: b,
+          sender_id: a,
+          content: state.tag + "_PRIVATE_QUESTION",
+          is_anonymous: false
+        })
+        .select("id")
+        .single();
+
+      if (q1.error) throw q1.error;
+
+      state.qPrivate = q1.data.id;
+
+      save();
+
+
+      const q2 = await supabase
+        .from("questions")
+        .insert({
+          recipient_id: b,
+          sender_id: a,
+          content: state.tag + "_ATTACK_QUESTION",
+          is_anonymous: false
+        })
+        .select("id")
+        .single();
+
+      if (q2.error) throw q2.error;
+
+      state.qAttack = q2.data.id;
+
+      save();
+
+      log(
+        "نجاح: تم إنشاء السؤالين من الحساب A إلى الحساب B.",
+        "pass"
+      );
+
+    } catch (error) {
+
+      log(
+        "فشل: " + error.message,
+        "fail"
+      );
+
+    }
+
+    await refreshSession();
+
+  };
+
+
+  // المرحلة الثانية: الحساب B ينشئ سؤالاً عكسياً وإجابة خاصة
+
+  $("createB").onclick = async () => {
+
+    clearLog();
+
+    try {
+
+      const a = $("accountA").value;
+      const b = $("accountB").value;
+
+      await requireAccount(b, "B");
+
+      if (!state.qPrivate || !state.qAttack) {
+        throw new Error(
+          "نفّذ المرحلة الأولى بالحساب A أولاً."
+        );
+      }
+
+      if (state.qReverse || state.answerId) {
+        throw new Error(
+          "بيانات المرحلة الثانية موجودة مسبقاً."
+        );
+      }
+
+
+      const question = await supabase
+        .from("questions")
+        .insert({
+          recipient_id: a,
+          sender_id: b,
+          content: state.tag + "_REVERSE_QUESTION",
+          is_anonymous: false
+        })
+        .select("id")
+        .single();
+
+      if (question.error) throw question.error;
+
+      state.qReverse = question.data.id;
+
+      save();
+
+
+      const answer = await supabase
+        .from("answers")
+        .insert({
+          question_id: state.qPrivate,
+          user_id: b,
+          content: state.tag + "_PRIVATE_ANSWER",
+          is_public: false
+        })
+        .select("id")
+        .single();
+
+      if (answer.error) throw answer.error;
+
+      state.answerId = answer.data.id;
+
+      save();
+
+      log(
+        "نجاح: أنشأ B السؤال العكسي والإجابة الخاصة.",
+        "pass"
+      );
+
+    } catch (error) {
+
+      log(
+        "فشل: " + error.message,
+        "fail"
+      );
+
+    }
+
+    await refreshSession();
+
+  };
+
+
+  // المرحلة الثالثة: اختبارات الحساب A
+
+  $("testA").onclick = async () => {
+
+    clearLog();
+
+    try {
+
+      const a = $("accountA").value;
+
+      await requireAccount(a, "A");
+
+      if (!state.answerId || !state.qAttack) {
+        throw new Error(
+          "أكمل المرحلة الثانية بالحساب B أولاً."
+        );
+      }
+
+
+      // هل يستطيع A قراءة إجابة B الخاصة؟
+
+      const privateRead = await supabase
+        .from("answers")
+        .select("id")
+        .eq("id", state.answerId);
+
+      expectDenied(
+        privateRead,
+        "منع A من قراءة إجابة B الخاصة"
+      );
+
+
+      // هل يستطيع A قراءة السؤال الذي أرسله؟
+
+      const ownQuestion = await supabase
+        .from("questions")
+        .select("id")
+        .eq("id", state.qPrivate);
+
+      expectVisible(
+        ownQuestion,
+        "السماح لـ A بقراءة السؤال الذي أرسله"
+      );
+
+
+      // هل يستطيع A الإجابة عن سؤال موجّه إلى B؟
+
+      const unauthorizedAnswer = await supabase
+        .from("answers")
+        .insert({
+          question_id: state.qAttack,
+          user_id: a,
+          content: state.tag + "_UNAUTHORIZED_ANSWER",
+          is_public: false
+        })
+        .select("id");
+
+      expectDenied(
+        unauthorizedAnswer,
+        "منع A من الإجابة عن سؤال مستلم إلى B"
+      );
+
+
+      log(
+        "اكتملت اختبارات الحساب A.",
+        "pass"
+      );
+
+    } catch (error) {
+
+      log(
+        "فشل: " + error.message,
+        "fail"
+      );
+
+    }
+
+    await refreshSession();
+
+  };
+
+
+  // المرحلة الرابعة: اختبارات الحساب B
+
+  $("testB").onclick = async () => {
+
+    clearLog();
+
+    try {
+
+      const b = $("accountB").value;
+
+      await requireAccount(b, "B");
+
+      if (!state.answerId || !state.qReverse) {
+        throw new Error(
+          "أكمل المرحلة الثانية أولاً."
+        );
+      }
+
+
+      // يجب أن يرى B إجابته الخاصة
+
+      const ownAnswer = await supabase
+        .from("answers")
+        .select("id")
+        .eq("id", state.answerId);
+
+      expectVisible(
+        ownAnswer,
+        "السماح لـ B بقراءة إجابته الخاصة"
+      );
+
+
+      // يحاول نقل الإجابة إلى سؤال هو مرسله وليس مستلمه
+
+      const moveAnswer = await supabase
+        .from("answers")
+        .update({
+          question_id: state.qReverse
+        })
+        .eq("id", state.answerId)
+        .select("id");
+
+      expectDenied(
+        moveAnswer,
+        "منع B من نقل إجابته إلى سؤال ليس مستلماً منه"
+      );
+
+
+      log(
+        "اكتملت اختبارات الحساب B.",
+        "pass"
+      );
+
+    } catch (error) {
+
+      log(
+        "فشل: " + error.message,
+        "fail"
+      );
+
+    }
+
+    await refreshSession();
+
+  };
+
+
+  // اختبار الزائر غير المسجل
+
+  $("testAnon").onclick = async () => {
+
+    clearLog();
+
+    try {
+
+      await supabase.auth.signOut();
+
+      const result = await supabase
+        .from("questions")
+        .select("id")
+        .limit(1);
+
+      if (
+        !result.error ||
+        result.error.code !== "42501"
+      ) {
+
+        throw new Error(
+          "لم نحصل على رفض الصلاحية المتوقع لدور anon. " +
+          (result.error?.message || "لم يرجع الطلب خطأ.")
+        );
+
+      }
+
+      log(
+        "نجاح: الزائر غير المسجل لا يستطيع قراءة جدول الأسئلة.",
+        "pass"
+      );
+
+      log(
+        "تم تسجيل الخروج. سجّل الدخول مجدداً قبل التنظيف."
+      );
+
+    } catch (error) {
+
+      log(
+        "فشل: " + error.message,
+        "fail"
+      );
+
+    }
+
+    await refreshSession();
+
+  };
+
+
+  // حذف صف اختبار بعد التأكد من علامة الاختبار
+
+  async function safeDelete(table, id) {
+
+    if (!id) return;
+
+    const check = await supabase
+      .from(table)
+      .select("id,content")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (check.error) throw check.error;
+
+    if (!check.data) return;
+
+    if (
+      typeof check.data.content !== "string" ||
+      !check.data.content.startsWith(state.tag)
+    ) {
+
+      throw new Error(
+        "توقف أمان: الصف لا يحمل علامة الاختبار."
+      );
+
+    }
+
+    const deletion = await supabase
+      .from(table)
+      .delete()
+      .eq("id", id)
+      .select("id");
+
+    if (deletion.error) throw deletion.error;
+
+    if (!deletion.data || deletion.data.length !== 1) {
+
+      throw new Error(
+        "لم يتم حذف الصف. تحقق من الحساب الحالي وصلاحيات DELETE."
+      );
+
+    }
+
+    log(
+      "تم حذف صف اختبار من " + table,
+      "pass"
+    );
+
+  }
+
+
+  // تنظيف بيانات B
+
+  $("cleanupB").onclick = async () => {
+
+    clearLog();
+
+    try {
+
+      await requireAccount(
+        $("accountB").value,
+        "B"
+      );
+
+      await safeDelete(
+        "answers",
+        state.answerId
+      );
+
+      await safeDelete(
+        "questions",
+        state.qReverse
+      );
+
+      state.answerId = null;
+      state.qReverse = null;
+
+      save();
+
+      log(
+        "اكتمل تنظيف بيانات الحساب B.",
+        "pass"
+      );
+
+    } catch (error) {
+
+      log(
+        "تعذر التنظيف: " + error.message,
+        "fail"
+      );
+
+    }
+
+    await refreshSession();
+
+  };
+
+
+  // تنظيف بيانات A
+
+  $("cleanupA").onclick = async () => {
+
+    clearLog();
+
+    try {
+
+      await requireAccount(
+        $("accountA").value,
+        "A"
+      );
+
+      await safeDelete(
+        "questions",
+        state.qPrivate
+      );
+
+      await safeDelete(
+        "questions",
+        state.qAttack
+      );
+
+      state.qPrivate = null;
+      state.qAttack = null;
+
+      save();
+
+      if (
+        !state.answerId &&
+        !state.qReverse
+      ) {
+
+        localStorage.removeItem(STORAGE_KEY);
+
+        log(
+          "اكتمل التنظيف بالكامل. تم حذف بيانات الاختبار.",
+          "pass"
+        );
+
+      } else {
+
+        log(
+          "تم تنظيف بيانات A. لا تزال هناك بيانات B؛ نفّذ تنظيف B أولاً.",
+          "pass"
+        );
+
+      }
+
+    } catch (error) {
+
+      log(
+        "تعذر التنظيف: " + error.message,
+        "fail"
+      );
+
+    }
+
+    await refreshSession();
+
+  };
+
+
+  // بدء الصفحة
+
+  try {
+
+    await loadProfiles();
+
+    await refreshSession();
+
+    log(
+      "تم الاتصال بـ Supabase وتحميل الحسابات. الصفحة جاهزة للاختبار."
+    );
+
+  } catch (error) {
+
+    $("session").textContent =
+      "تعذر تشغيل الصفحة: " + error.message;
+
+    log(
+      "خطأ تهيئة: " + error.message,
+      "fail"
+    );
+
+  }
+
+</script>
+
+</body>
+</html>
