@@ -1,0 +1,377 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#17151d">
+  <title>اختبار أمان الحسابات</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #111018;
+      color: #f5f3f7;
+      font-family: system-ui, sans-serif;
+      line-height: 1.7;
+    }
+
+    main {
+      max-width: 560px;
+      margin: 25px auto;
+    }
+
+    .card {
+      background: #1c1a25;
+      border: 1px solid #393544;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+
+    h1 {
+      font-size: 23px;
+    }
+
+    h2 {
+      font-size: 18px;
+    }
+
+    p {
+      color: #c4bfce;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 10px;
+      background: #db2777;
+      color: white;
+      font: inherit;
+      font-weight: bold;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+    }
+
+    select {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid #484354;
+      background: #111018;
+      color: white;
+      font: inherit;
+    }
+
+    .status {
+      margin-top: 15px;
+      padding: 13px;
+      border-radius: 10px;
+      background: #292634;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .success {
+      border: 1px solid #15803d;
+      color: #bbf7d0;
+    }
+
+    .failure {
+      border: 1px solid #b91c1c;
+      color: #fecaca;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #aaa5b5;
+    }
+
+    code {
+      direction: ltr;
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main>
+
+    <h1>اختبار أمان صلاحيات الحسابات</h1>
+
+    <p>
+      هذه صفحة مؤقتة لاختبار منع المستخدم من تعديل
+      الملف الشخصي لمستخدم آخر.
+    </p>
+
+    <section class="card">
+
+      <h2>حالة تسجيل الدخول</h2>
+
+      <div id="accountStatus" class="status">
+        جارٍ التحقق من جلسة الدخول...
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>اختبار منع تعديل حساب آخر</h2>
+
+      <p>الحساب الذي ستتم محاولة تعديل ملفه:</p>
+
+      <select id="targetAccount">
+        <option value="">جارٍ تحميل الحسابات...</option>
+      </select>
+
+      <button id="testButton" disabled>
+        تنفيذ اختبار الحماية
+      </button>
+
+      <div id="testResult" class="status">
+        بانتظار تنفيذ الاختبار.
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>ماذا تعني النتيجة؟</h2>
+
+      <p>
+        <strong>نجاح:</strong>
+        قاعدة البيانات رفضت تعديل ملف المستخدم الآخر.
+      </p>
+
+      <p>
+        <strong>فشل:</strong>
+        قاعدة البيانات سمحت بتعديل ملف لا يملكه المستخدم.
+      </p>
+
+      <p class="small">
+        لن نحاول تغيير اسم الحساب الآخر؛ الاختبار يستخدم
+        الاسم الحالي نفسه ويتحقق من صلاحية التحديث فقط.
+      </p>
+
+    </section>
+
+  </main>
+
+  <script type="module">
+
+    import { createClient }
+      from "https://esm.sh/@supabase/supabase-js@2.57.0";
+
+    import { SUPABASE_CONFIG }
+      from "./config.js";
+
+    const supabase = createClient(
+      SUPABASE_CONFIG.url,
+      SUPABASE_CONFIG.publishableKey
+    );
+
+    const accountStatus =
+      document.getElementById("accountStatus");
+
+    const targetAccount =
+      document.getElementById("targetAccount");
+
+    const testButton =
+      document.getElementById("testButton");
+
+    const testResult =
+      document.getElementById("testResult");
+
+    let currentUser = null;
+    let otherAccounts = [];
+
+    function showResult(message, type = "") {
+      testResult.textContent = message;
+      testResult.className = "status " + type;
+    }
+
+    async function initialize() {
+
+      try {
+
+        const { data, error } =
+          await supabase.auth.getSession();
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data.session) {
+
+          accountStatus.textContent =
+            "لا توجد جلسة دخول.\n\n" +
+            "سجّل الدخول من صفحة الحسابات أولاً، " +
+            "ثم افتح صفحة الاختبار.";
+
+          accountStatus.className =
+            "status failure";
+
+          return;
+        }
+
+        currentUser = data.session.user;
+
+        accountStatus.textContent =
+          "تم تسجيل الدخول بنجاح.\n\n" +
+          "البريد: " + currentUser.email + "\n" +
+          "معرّف الحساب: " + currentUser.id;
+
+        const { data: profiles, error: profileError } =
+          await supabase
+            .from("profiles")
+            .select("id, username, display_name")
+            .neq("id", currentUser.id)
+            .order("created_at", { ascending: false })
+            .limit(20);
+
+        if (profileError) {
+          throw profileError;
+        }
+
+        otherAccounts = profiles || [];
+
+        targetAccount.replaceChildren();
+
+        if (otherAccounts.length === 0) {
+
+          targetAccount.add(
+            new Option("لم يتم العثور على حساب آخر", "")
+          );
+
+          showResult(
+            "لا يوجد حساب آخر متاح للاختبار.",
+            "failure"
+          );
+
+          return;
+        }
+
+        for (const profile of otherAccounts) {
+
+          const option = new Option(
+            profile.display_name +
+            " (@" + profile.username + ")",
+            profile.id
+          );
+
+          targetAccount.add(option);
+        }
+
+        testButton.disabled = false;
+
+        showResult(
+          "تم العثور على الحساب الآخر.\n" +
+          "يمكنك الآن تنفيذ اختبار الحماية."
+        );
+
+      } catch (error) {
+
+        accountStatus.textContent =
+          "حدث خطأ أثناء التحقق:\n" +
+          error.message;
+
+        accountStatus.className =
+          "status failure";
+      }
+    }
+
+    testButton.addEventListener("click", async () => {
+
+      const targetId = targetAccount.value;
+
+      const target = otherAccounts.find(
+        profile => profile.id === targetId
+      );
+
+      if (!target) {
+
+        showResult(
+          "اختر الحساب الآخر أولاً.",
+          "failure"
+        );
+
+        return;
+      }
+
+      testButton.disabled = true;
+
+      showResult("جارٍ اختبار سياسة الحماية...");
+
+      try {
+
+        const { data, error } = await supabase
+          .from("profiles")
+          .update({
+            display_name: target.display_name
+          })
+          .eq("id", target.id)
+          .select("id");
+
+        if (error) {
+
+          showResult(
+            "لم يكتمل الاختبار بسبب خطأ من الخادم:\n" +
+            error.message,
+            "failure"
+          );
+
+        } else if (!data || data.length === 0) {
+
+          showResult(
+            "نجاح: قاعدة البيانات منعت الحساب الحالي " +
+            "من تعديل ملف الحساب الآخر.\n\n" +
+            "عدد الصفوف التي تم تعديلها: 0",
+            "success"
+          );
+
+        } else {
+
+          showResult(
+            "فشل أمني: قاعدة البيانات أعادت صفاً " +
+            "رغم أن الحساب الحالي لا يملكه.\n\n" +
+            "أوقف الاختبارات وأبلغني فوراً.",
+            "failure"
+          );
+
+        }
+
+      } catch (error) {
+
+        showResult(
+          "خطأ غير متوقع:\n" + error.message,
+          "failure"
+        );
+
+      } finally {
+
+        testButton.disabled = false;
+
+      }
+
+    });
+
+    initialize();
+
+  </script>
+
+</body>
+</html>
