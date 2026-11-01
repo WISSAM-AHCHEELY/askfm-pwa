@@ -281,15 +281,16 @@
       (event.reason?.message || String(event.reason));
   });
 </script>
-<script type="module">
+<script>
+(async function () {
+  try {
+    const [supabaseModule, configModule] = await Promise.all([
+      import("https://esm.sh/@supabase/supabase-js@2.57.0"),
+      import("./config.js")
+    ]);
 
-  import {
-    createClient
-  } from "https://esm.sh/@supabase/supabase-js@2.57.0";
-
-  import {
-    SUPABASE_CONFIG
-  } from "./config.js";
+    const createClient = supabaseModule.createClient;
+    const SUPABASE_CONFIG = configModule.SUPABASE_CONFIG;
 
 
   const supabase = createClient(
@@ -1069,7 +1070,14 @@
     );
 
   }
+  } catch (error) {
+    const logBox = document.getElementById("log");
 
+    logBox.textContent =
+      "فشل تحميل المكتبات أو الإعدادات:\n" +
+      (error.stack || error.message || String(error));
+  }
+})();
 </script>
 
 </body>
