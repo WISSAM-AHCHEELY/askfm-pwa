@@ -1,1 +1,122 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#17151d">
+  <meta name="description" content="إنشاء حساب أو تسجيل الدخول">
+  <title>الحساب — ASK</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./auth.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./">
+        <span class="brand-mark">A</span>
+        <span>ASK</span>
+      </a>
+      <a class="back-link" href="./">الرئيسية</a>
+    </header>
+
+    <main class="auth-page">
+      <section class="auth-intro">
+        <span class="eyebrow">مرحباً بك</span>
+        <h1>مساحتك تبدأ <span>من هنا.</span></h1>
+        <p>أنشئ حسابك وابدأ بطرح الأسئلة ومشاركة إجاباتك.</p>
+      </section>
+
+      <section class="auth-card">
+        <div class="auth-heading">
+          <h2 id="authTitle">إنشاء حساب جديد</h2>
+          <p id="authSubtitle">أدخل بياناتك للانضمام إلى المنصة.</p>
+        </div>
+
+        <div class="auth-tabs" id="authTabs">
+          <button type="button" class="auth-tab active" data-mode="signup">إنشاء حساب</button>
+          <button type="button" class="auth-tab" data-mode="login">تسجيل الدخول</button>
+        </div>
+
+        <form id="authForm" novalidate>
+          <label class="auth-field" id="nameField">
+            <span>الاسم الظاهر</span>
+            <input
+              id="displayName"
+              type="text"
+              maxlength="60"
+              autocomplete="name"
+              placeholder="اكتب الاسم الذي سيظهر للآخرين"
+            >
+          </label>
+
+          <label class="auth-field" id="emailField">
+            <span>البريد الإلكتروني</span>
+            <input
+              id="email"
+              type="email"
+              maxlength="254"
+              autocomplete="email"
+              placeholder="name@example.com"
+              required
+            >
+          </label>
+
+          <label class="auth-field" id="passwordField">
+            <span>كلمة المرور</span>
+            <input
+              id="password"
+              type="password"
+              minlength="8"
+              autocomplete="new-password"
+              placeholder="8 أحرف على الأقل"
+            >
+          </label>
+
+          <label class="auth-field hidden" id="confirmPasswordField">
+            <span>تأكيد كلمة المرور</span>
+            <input
+              id="confirmPassword"
+              type="password"
+              minlength="8"
+              autocomplete="new-password"
+              placeholder="أعد كتابة كلمة المرور"
+            >
+          </label>
+
+          <button class="primary-button" id="authSubmit" type="submit">
+            إنشاء الحساب
+          </button>
+        </form>
+
+        <button type="button" class="text-button hidden" id="forgotPasswordButton">
+          نسيت كلمة المرور؟
+        </button>
+
+        <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
+
+        <section class="account-panel hidden" id="accountPanel">
+          <div class="account-avatar">✓</div>
+          <div class="account-details">
+            <span class="eyebrow">حسابك متصل</span>
+            <h3 id="accountEmail"></h3>
+            <p id="accountStatus">تم تسجيل الدخول بنجاح.</p>
+          </div>
+          <button type="button" class="secondary-button" id="signOutButton">
+            تسجيل الخروج
+          </button>
+        </section>
+      </section>
+
+      <p class="auth-footer">
+        بالانضمام إلى المنصة، أنت توافق على استخدام الحساب بشكل مسؤول.
+      </p>
+    </main>
+  </div>
+
+  <script type="module" src="./auth.js"></script>
+</body>
+</html>
