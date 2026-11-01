@@ -262,7 +262,25 @@
     </div>
 
   </section>
+<script>
+  const logBox = document.getElementById("log");
 
+  logBox.textContent = "بدأ تحميل JavaScript، جارٍ التحقق من المكتبات...";
+
+  window.addEventListener("error", function(event) {
+    logBox.textContent =
+      "خطأ في تحميل أو تشغيل JavaScript:\n" +
+      (event.message || "خطأ غير محدد") +
+      "\nالمصدر: " + (event.filename || "غير معروف") +
+      "\nالسطر: " + (event.lineno || "غير معروف");
+  });
+
+  window.addEventListener("unhandledrejection", function(event) {
+    logBox.textContent =
+      "فشل تحميل مكتبة أو تنفيذ طلب:\n" +
+      (event.reason?.message || String(event.reason));
+  });
+</script>
 <script type="module">
 
   import {
